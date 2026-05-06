@@ -1,5 +1,3 @@
-from textnode import TextType, TextNode
-
 class HTMLNode():
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -14,7 +12,7 @@ class HTMLNode():
         prop_string = ""
         if self.props != None:
             for prop in self.props:
-                prop_string += f" {prop}={self.props[prop]}"
+                prop_string += f' {prop}="{self.props[prop]}"'
         return prop_string
 
     def __repr__(self):
@@ -48,20 +46,3 @@ class ParentNode(HTMLNode):
             html_string += child.to_html()
         html_string += f"</{self.tag}>"
         return html_string
-
-def text_node_to_html_node(text_node):
-    if text_node.text_type not in TextType:
-        raise Exception()
-    if text_node.text_type == TextType.TEXT:
-        return LeafNode(tag=None, value=text_node.text)
-    elif text_node.text_type == TextType.BOLD:
-        return LeafNode(tag="b", value=text_node.text)
-    elif text_node.text_type == TextType.ITALIC:
-        return LeafNode(tag="i", value=text_node.text)
-    elif text_node.text_type == TextType.CODE:
-        return LeafNode(tag="code", value=text_node.text)
-    elif text_node.text_type == TextType.LINK:
-        return LeafNode(tag="a", value=text_node.text, props={"href":text_node.url})
-    elif text_node.text_type == TextType.IMAGE:
-        return LeafNode(tag="a", value="", props={"src":text_node.url, "alt":text_node.text})
-    return
