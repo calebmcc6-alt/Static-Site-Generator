@@ -2,6 +2,7 @@ from textnode import TextNode, TextType
 from helper import markdown_to_html_node
 import shutil
 import os
+import sys
 
 def copy_directory(source, destination):
     # print(f"source={source}")
@@ -29,7 +30,7 @@ def extract_title(markdown):
         else:
             raise Exception()
     
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path) as f:
         from_path_data = f.read()
@@ -39,24 +40,26 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(from_path_data)
     dest_path_data = template_path_data.replace("{{ Title }}", title)
     dest_path_data = dest_path_data.replace("{{ Content }}", html_string)
+    dest_path_data = dest_path_data.replace('href="/', f'href="{basepath}')
+    dest_path_data = dest_path_data.replace('src="/', f'src="{basepath}')
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, "w") as f:
         f.write(dest_path_data)
     return
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     dir_list = os.listdir(dir_path_content)
     for dir in dir_list:
         if dir[-3:] == ".md":
             dest_file = dir[:-3] + ".html"
-            generate_page(os.path.join(dir_path_content, dir), template_path, os.path.join(dest_dir_path, dest_file))
+            generate_page(os.path.join(dir_path_content, dir), template_path, os.path.join(dest_dir_path, dest_file), basepath)
         else:
-            generate_pages_recursive(os.path.join(dir_path_content, dir), template_path, os.path.join(dest_dir_path, dir))
+            generate_pages_recursive(os.path.join(dir_path_content, dir), template_path, os.path.join(dest_dir_path, dir), basepath)
     return
 
-def main():
-    copy_directory("./static", "./public")
-    generate_pages_recursive("./content/", "./template.html", "./public/")
+def main(basepath="/"):
+    copy_directory("./static", "./docs")
+    generate_pages_recursive("./content/", "./template.html", "./docs/", basepath)
 
 
-main()
+main(sys.argv[1])
